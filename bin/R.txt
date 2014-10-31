@@ -92,8 +92,13 @@ int drawable ic_plusone_standard_off_client 0x7f02001d
 int drawable ic_plusone_tall_off_client 0x7f02001e
 int drawable powered_by_google_dark 0x7f02001f
 int drawable powered_by_google_light 0x7f020020
-int id action_settings 0x7f070015
+int id action_settings 0x7f07001a
 int id book_now 0x7f070010
+int id boton_circulo 0x7f070019
+int id boton_genruta 0x7f070018
+int id boton_genzona 0x7f070017
+int id boton_limpiar 0x7f070016
+int id botones 0x7f070015
 int id buyButton 0x7f07000a
 int id buy_now 0x7f07000f
 int id buy_with_google 0x7f07000e

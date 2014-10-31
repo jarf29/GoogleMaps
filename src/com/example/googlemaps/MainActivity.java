@@ -29,6 +29,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -37,8 +39,12 @@ import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMyLocationChangeListener;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polygon;
+import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 public class MainActivity extends Activity implements OnMapLongClickListener,
@@ -47,6 +53,8 @@ public class MainActivity extends Activity implements OnMapLongClickListener,
 
 	double lat2;
 	double lon2;
+	boolean on = false;
+	private static ArrayList<LatLng> puntos = new ArrayList<LatLng>();
 
 	static LocationManager lm;
 	static MiLocationListener mlistener;
@@ -62,11 +70,12 @@ public class MainActivity extends Activity implements OnMapLongClickListener,
 		mlistener = new MiLocationListener();
 		lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 5,
 				mlistener);
-		
-		googleMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
-		
+
+		googleMap = ((MapFragment) getFragmentManager().findFragmentById(
+				R.id.map)).getMap();
+
 		googleMap.setMyLocationEnabled(true);
-		
+
 		googleMap.setOnMapClickListener(this);
 		googleMap.setOnMapLongClickListener(this);
 		googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
@@ -78,6 +87,56 @@ public class MainActivity extends Activity implements OnMapLongClickListener,
 
 	}
 
+	public void limpiar(View view) {
+		googleMap.clear();
+	}
+
+	public void genzona(View view) {
+
+		if (puntos.size() != 4) {
+			Toast.makeText(this, "Deben haber 4 puntos para generar una zona",
+					Toast.LENGTH_LONG).show();
+		} else {
+
+			PolygonOptions opcionesPoligono = new PolygonOptions()
+					.add(new LatLng(puntos.get(0).latitude,
+							puntos.get(0).longitude))
+					.add(new LatLng(puntos.get(1).latitude,
+							puntos.get(1).longitude))
+					.add(new LatLng(puntos.get(2).latitude,
+							puntos.get(2).longitude))
+					.add(new LatLng(puntos.get(3).latitude,
+							puntos.get(3).longitude));
+
+			Polygon poligono = googleMap.addPolygon(opcionesPoligono);
+
+			poligono.setFillColor(Color.BLUE); // Relleno del polígono
+			poligono.setStrokeColor(Color.RED); // Bordes del polígono
+
+			puntos = new ArrayList<LatLng>();
+
+		}
+
+		
+	}
+
+	public void genruta(View view) {
+
+		connectAsyncTask _connectAsyncTask = new connectAsyncTask();
+		_connectAsyncTask.execute();
+
+	}
+	
+	public void gencirculo(View view){
+		 CircleOptions opcionesCirculo = new CircleOptions().center(
+			       new LatLng(lat2,lon2)).radius(200);
+			    googleMap.clear();
+			    Circle circulo = googleMap.addCircle(opcionesCirculo);
+			    circulo.setFillColor(Color.RED);
+			    circulo.setStrokeColor(Color.RED);
+			    circulo.setStrokeWidth(2f);
+	}
+
 	private class connectAsyncTask extends AsyncTask<Void, Void, Void> {
 		private ProgressDialog progressDialog;
 
@@ -86,7 +145,7 @@ public class MainActivity extends Activity implements OnMapLongClickListener,
 			// TODO Auto-generated method stub
 			super.onPreExecute();
 			progressDialog = new ProgressDialog(MainActivity.this);
-			progressDialog.setMessage("Fetching route, Please wait...");
+			progressDialog.setMessage("analizando ruta, espere un momento");
 			progressDialog.setIndeterminate(true);
 			progressDialog.show();
 		}
@@ -214,26 +273,22 @@ public class MainActivity extends Activity implements OnMapLongClickListener,
 			LatLng pos = new LatLng(Double.parseDouble(lat),
 					Double.parseDouble(lon));
 			CameraUpdate cam = CameraUpdateFactory.newLatLngZoom(pos, 15);
-		
-			connectAsyncTask _connectAsyncTask = new connectAsyncTask();
-			_connectAsyncTask.execute();
 			
 			googleMap.moveCamera(cam);
 
 		}
-		
 
 		public synchronized void onProviderDisabled(String provider) {
-			
+
 		}
 
 		public synchronized void onProviderEnabled(String provider) {
-			
+
 		}
 
 		public synchronized void onStatusChanged(String provider, int status,
 				Bundle extras) {
-			
+
 		}
 	}
 
@@ -250,6 +305,11 @@ public class MainActivity extends Activity implements OnMapLongClickListener,
 
 		lat2 = point.latitude;
 		lon2 = point.longitude;
+
+		puntos.add(point);
+
+		// Toast.makeText(this,""+point,Toast.LENGTH_LONG).show();
+		// Toast.makeText(this,""+coords.get(0),Toast.LENGTH_LONG).show();
 
 	}
 
